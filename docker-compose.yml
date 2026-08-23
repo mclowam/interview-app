@@ -1,0 +1,44 @@
+services:
+  auth:
+    build: ./backend/auth
+    container_name: auth_interview
+    env_file:
+      - ./backend/auth/.env
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./migrations:/service/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auth-network
+
+  auth-postgres:
+    image: postgres:16-alpine
+    container_name: interview_auth_pg
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata_auth:/var/lib/postgresql/data
+    networks:
+      - auth-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d auth_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata_auth:
+
+networks:
+  auth-network:
+    driver: bridge
