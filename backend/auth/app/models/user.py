@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import String, Boolean, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from backend.auth.app.db.base import Base
+from app.db.base import Base
 
 
 
@@ -17,9 +17,8 @@ class UserModel(Base):
     username: Mapped[str] = mapped_column(
         String(500), unique=True, index=True, nullable=False
     )
-    tg_id: Mapped[int] = mapped_column(
+    tg_id: Mapped[str] = mapped_column(
         String(200), unique=True, index=True, nullable=False
-
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_staff: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)

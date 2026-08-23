@@ -1,12 +1,12 @@
 import uuid
 from typing import Protocol, runtime_checkable
 
-from backend.auth.app.schemas.user import UserCreateSchema, UserResponseSchema
+from app.schemas.user import UserCreateSchema, UserResponseSchema
 
 
 @runtime_checkable
 class IUser(Protocol):
-    async def add(self, data: UserCreateSchema):
+    async def add(self, username, tg_id, is_staff):
         pass
 
     async def get_user_by_tg_id(self, tg_id:str)-> UserResponseSchema:

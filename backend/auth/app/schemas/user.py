@@ -9,6 +9,8 @@ class UserCreateSchema(BaseModel):
 
 
 class UserResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     username: str
     tg_id: str

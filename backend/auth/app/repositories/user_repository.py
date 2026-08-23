@@ -1,10 +1,9 @@
 import uuid
 
-from hupper import is_active
 from sqlalchemy import select
 
-from backend.auth.app.models.user import UserModel
-from backend.auth.app.schemas.user import UserCreateSchema
+from app.models.user import UserModel
+from app.schemas.user import UserCreateSchema
 
 
 class UserRepository:
@@ -27,7 +26,7 @@ class UserRepository:
 
         self._session.add(user)
         await self._session.commit()
-        await self._session.refresh()
+        await self._session.refresh(user)
 
         return user
 
