@@ -15,10 +15,10 @@ api_v1 = APIRouter(prefix="/auth/api/v1")
 
 @api_v1.post("/", response_model=UserResponseSchema)
 async def create_user(
-    session: SessionDep,
-    username: str,
-    tg_id: str,
-    is_staff: bool = False,
+        session: SessionDep,
+        username: str,
+        tg_id: str,
+        is_staff: bool = False,
 ):
     service = get_service(session)
     return await service.add_user(
@@ -28,7 +28,13 @@ async def create_user(
     )
 
 
-@api_v1.get("/tg/id", response_model=UserResponseSchema)
+@api_v1.get("/tg/{tg_id}", response_model=UserResponseSchema)
 async def user_by_tg_id(session: SessionDep, tg_id: str):
     service = get_service(session)
     return await service.get_user_by_tg_id(tg_id=tg_id)
+
+
+@api_v1.get("/username/{username}", response_model=UserResponseSchema)
+async def user_by_username(session: SessionDep, username: str):
+    service = get_service(session)
+    return await service.get_user_username(username=username)
