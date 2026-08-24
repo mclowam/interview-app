@@ -3,7 +3,7 @@ services:
     build: ./backend/auth
     container_name: auth_interview
     env_file:
-      - ./backend/auth/.env.example
+      - ./backend/auth/.env
     environment:
       DB_HOST: auth-postgres
       DB_PORT: 5432
@@ -16,6 +16,26 @@ services:
         condition: service_healthy
     networks:
       - auth-network
+      - app-shared-network
+
+  interview:
+    build: ./backend/interview
+    container_name: interview_module
+    env_file:
+      - ./backend/interview/.env
+    environment:
+      DB_HOST: interview-postgres
+      DB_PORT: 5432
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./backend/interview/migrations:/service/migrations
+    depends_on:
+      interview-postgres:
+        condition: service_healthy
+    networks:
+      - interview-network
+      - app-shared-network
 
   auth-postgres:
     image: postgres:16-alpine
@@ -36,9 +56,33 @@ services:
       timeout: 5s
       retries: 5
 
+  interview-postgres:
+    image: postgres:16-alpine
+    container_name: interview_pg
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: interview_db
+    ports:
+      - "5434:5432"
+    volumes:
+        - pgdata_interview:/var/lib/postgresql/data
+    networks:
+      - interview-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d interview_db" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata_auth:
+  pgdata_interview:
 
 networks:
   auth-network:
+    driver: bridge
+  interview-network:
+    driver: bridge
+  app-shared-network:
     driver: bridge
