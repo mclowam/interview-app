@@ -20,5 +20,5 @@ class InterviewModel(Base):
         String(500)
     )
     status: Mapped[str] = mapped_column(
-        String(200)
+        String(200), default="active"
     )
