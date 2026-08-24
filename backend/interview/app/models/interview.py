@@ -14,7 +14,7 @@ class InterviewModel(Base):
         String(200), index=True, nullable=False
     )
     level: Mapped[int] = mapped_column(
-        Integer,
+        Integer, nullable=True
     )
     position: Mapped[str] = mapped_column(
         String(500)
