@@ -11,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 from app.core.config import config as app_config
 from app.db.base import Base
 from app.models.interview import InterviewModel
+from app.models.turn import TurnModel
 
 config = context.config
 
