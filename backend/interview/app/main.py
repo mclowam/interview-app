@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 
 from app.routers.interview import api_v1
-app = FastAPI()
+
+app = FastAPI(title="interview")
 
 
 @app.get("/health")

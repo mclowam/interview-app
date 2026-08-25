@@ -18,13 +18,11 @@ async def create_user(
         session: SessionDep,
         username: str,
         tg_id: str,
-        is_staff: bool = False,
 ):
     service = get_service(session)
     return await service.add_user(
         username=username,
         tg_id=tg_id,
-        is_staff=is_staff,
     )
 
 
@@ -38,3 +36,10 @@ async def user_by_tg_id(session: SessionDep, tg_id: str):
 async def user_by_username(session: SessionDep, username: str):
     service = get_service(session)
     return await service.get_user_username(username=username)
+
+
+@api_v1.get("/users", response_model=list[UserResponseSchema])
+async def all_users(session: SessionDep):
+    service = get_service(session)
+    return await service.get_all_users()
+

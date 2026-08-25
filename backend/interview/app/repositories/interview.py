@@ -13,12 +13,12 @@ class InterviewRepository:
     async def add(self, data: InterviewCreateSchema):
         interview = InterviewModel(
             user_id=data.user_id,
-            position=data.position
+            position=data.position,
         )
 
         self._session.add(interview)
         await self._session.commit()
-        await self._session.refresh()
+        await self._session.refresh(interview)
 
         return interview
 
@@ -28,10 +28,14 @@ class InterviewRepository:
 
         return result.scalars().all()
 
-    async def update(self,interview_id: uuid.UUID, data: InterviewUpdateSchema):
+    async def get_by_id(self, interview_id: uuid.UUID):
         query = select(InterviewModel).where(InterviewModel.id == interview_id)
         result = await self._session.execute(query)
-        interview = result.scalars().first()
+
+        return result.scalars().first()
+
+    async def update(self, interview_id: uuid.UUID, data: InterviewUpdateSchema):
+        interview = await self.get_by_id(interview_id)
 
         if not interview:
             return None

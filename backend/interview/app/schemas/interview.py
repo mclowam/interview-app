@@ -1,21 +1,24 @@
 import uuid
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class InterviewCreateSchema(BaseModel):
     user_id: str
     position: str
 
+
 class InterviewResponseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID
     user_id: str
-    level: str
+    level: int | None
     position: str
     status: str
 
+
 class InterviewUpdateSchema(BaseModel):
-    level: str | None = None
+    level: int | None = None
     position: str | None = None
     status: str | None = None
-

@@ -53,3 +53,9 @@ class UserRepository:
         result = await self._session.execute(query)
 
         return result.scalar_one_or_none()
+
+    async def all_users(self):
+        query = select(UserModel)
+        result = await self._session.execute(query)
+
+        return result.scalars().all()

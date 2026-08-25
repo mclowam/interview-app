@@ -11,7 +11,7 @@ class UserService:
         self,
         username: str,
         tg_id: str,
-        is_staff: bool,
+        is_staff: bool = False,
     ):
         if await self._user.exists_by_username(username):
             raise HTTPException(
@@ -41,4 +41,9 @@ class UserService:
         result = await self._user.get_user_by_username(username=username)
         if result is None:
             raise HTTPException(status_code=404, detail="user not found")
+        return result
+
+    async def get_all_users(self):
+        result = await self._user.all_users()
+
         return result

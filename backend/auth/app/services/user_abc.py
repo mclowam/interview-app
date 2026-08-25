@@ -20,3 +20,6 @@ class IUser(Protocol):
 
     async def exists_by_username(self, username: str):
         pass
+
+    async def all_users(self):
+        pass

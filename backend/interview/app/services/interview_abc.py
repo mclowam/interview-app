@@ -1,5 +1,6 @@
 import uuid
 from typing import Protocol, runtime_checkable
+
 from app.schemas.interview import InterviewCreateSchema, InterviewUpdateSchema
 
 
@@ -11,12 +12,14 @@ class IInterview(Protocol):
     async def update(self, interview_id: uuid.UUID, data: InterviewUpdateSchema):
         pass
 
-    async def get_interview(self, user_id:str):
+    async def get_interview(self, user_id: str):
+        pass
+
+    async def get_by_id(self, interview_id: uuid.UUID):
         pass
 
 
 @runtime_checkable
 class IFreeInterview(Protocol):
-    async def get_questions(self, position:str, level):
+    async def get_questions(self, position: str, level):
         pass
-
