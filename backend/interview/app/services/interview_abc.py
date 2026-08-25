@@ -13,3 +13,10 @@ class IInterview(Protocol):
 
     async def get_interview(self, user_id:str):
         pass
+
+
+@runtime_checkable
+class IFreeInterview(Protocol):
+    async def get_questions(self, position:str, level):
+        pass
+
