@@ -2,7 +2,7 @@ import uuid
 from typing import Protocol, runtime_checkable
 
 from app.schemas.interview import InterviewCreateSchema, InterviewUpdateSchema
-from app.schemas.schemas import TurnUpdateSchema, QA
+from app.schemas.schemas import TurnUpdateSchema, QA, EvaluationResult
 
 
 @runtime_checkable
@@ -48,6 +48,8 @@ class IQuestionGenerator(Protocol):
     async def generate(self, position: str, level: int, history: list[QA]) -> str:
         pass
 
+
 @runtime_checkable
 class IAnswerEvaluator(Protocol):
-    pass
+    async def evaluate(self, question: str, answer: str, position: str, level: int) -> EvaluationResult:
+        pass
