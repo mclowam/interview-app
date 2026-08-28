@@ -1,4 +1,5 @@
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
@@ -29,6 +30,12 @@ class TurnResponseSchema(BaseModel):
     created_at: datetime
 
 
-class QA(BaseModel):
+@dataclass(frozen=True)
+class QA:
     question: str
     answer: str
+
+
+class EvaluationResult(BaseModel):
+    score: int
+    feedback: str
