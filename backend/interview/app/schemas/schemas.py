@@ -1,18 +1,19 @@
 import uuid
+from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict
 
 
 class TurnCreateSchema(BaseModel):
-    interview_id: uuid.UUID
     question: str
-    turn_number: int
 
 
 class TurnUpdateSchema(BaseModel):
-    answer: str | None = None
-    turn_number: int | None = None
-    score: int | None = None
-    feedback: str | None = None
+    answer: Optional[str] = None
+    turn_number: Optional[int] = None
+    score: Optional[int] = None
+    feedback: Optional[str] = None
 
 
 class TurnResponseSchema(BaseModel):
@@ -22,6 +23,12 @@ class TurnResponseSchema(BaseModel):
     interview_id: uuid.UUID
     question: str
     turn_number: int
+    answer: Optional[str] = None
+    score: Optional[int] = None
+    feedback: Optional[str] = None
+    created_at: datetime
+
+
+class QA(BaseModel):
+    question: str
     answer: str
-    score: int
-    feedback: str

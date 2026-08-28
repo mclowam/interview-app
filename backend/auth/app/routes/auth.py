@@ -10,7 +10,7 @@ def get_service(session) -> UserService:
     return UserService(UserRepository(session=session))
 
 
-api_v1 = APIRouter(prefix="/auth/api/v1")
+api_v1 = APIRouter(prefix="/api/v1/auth")
 
 
 @api_v1.post("/", response_model=UserResponseSchema)
