@@ -17,3 +17,4 @@ asyncpg
 psycopg2-binary
 alembic
 pydantic-settings
+google-genai

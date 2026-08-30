@@ -2,7 +2,10 @@ import uuid
 
 from fastapi import APIRouter
 
+from app.core.config import config
 from app.db.session import SessionDep
+from app.llm.gemini_answer import GeminiAnswerEvaluator
+from app.llm.gemini_question import GeminiQuestionGenerator
 from app.repositories.interview import InterviewRepository
 from app.repositories.turn import TurnRepository
 from app.schemas.interview import (
@@ -11,17 +14,27 @@ from app.schemas.interview import (
     InterviewUpdateSchema,
 )
 from app.schemas.schemas import (
-    TurnCreateSchema,
     TurnResponseSchema,
     TurnUpdateSchema,
 )
 from app.services.interview_service import InterviewService
 
+question_generator = GeminiQuestionGenerator(
+    api_key=config.GEMINI_API_KEY,
+    model=config.GEMINI_MODEL,
+)
+answer_evaluator = GeminiAnswerEvaluator(
+    api_key=config.GEMINI_API_KEY,
+    model=config.GEMINI_MODEL,
+)
+
 
 def get_service(session) -> InterviewService:
     return InterviewService(
         interview=InterviewRepository(session),
-        turn=TurnRepository(session)
+        turn=TurnRepository(session),
+        question_generator=question_generator,
+        answer_evaluator=answer_evaluator,
     )
 
 
@@ -64,9 +77,9 @@ async def get_turns(session: SessionDep, interview_id: uuid.UUID):
 
 
 @api_v1.post("/{interview_id}/turns", response_model=TurnResponseSchema)
-async def create_turns(session: SessionDep, interview_id: uuid.UUID, data: TurnCreateSchema):
+async def create_turns(session: SessionDep, interview_id: uuid.UUID):
     service = get_service(session)
-    return await service.add_turn(interview_id=interview_id, data=data)
+    return await service.add_turn(interview_id=interview_id)
 
 
 @api_v1.get("/turns/{turn_id}", response_model=TurnResponseSchema)

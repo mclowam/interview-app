@@ -39,7 +39,12 @@ class ITurn(Protocol):
     async def get_max_turn_number(self, interview_id: uuid.UUID):
         pass
 
-    async def update(self, turn_id: uuid.UUID, data: TurnUpdateSchema):
+    async def update(
+            self,
+            turn_id: uuid.UUID,
+            data: TurnUpdateSchema | None = None,
+            **fields,
+    ):
         pass
 
 

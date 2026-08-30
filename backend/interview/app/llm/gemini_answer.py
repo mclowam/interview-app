@@ -1,10 +1,18 @@
-from google import genai
-from google.genai import types
+import asyncio
+import logging
 
+from google import genai
+from google.genai import errors, types
+
+from app.llm.exceptions import AnswerEvaluationError
 from app.schemas.schemas import EvaluationResult
+
+logger = logging.getLogger(__name__)
 
 SCORE_MIN = 1
 SCORE_MAX = 10
+LEVEL_LABELS = {1: "джуниор", 2: "мидл", 3: "сеньор"}
+MAX_ATTEMPTS = 3
 
 
 class GeminiAnswerEvaluator:
@@ -16,21 +24,39 @@ class GeminiAnswerEvaluator:
             self, question: str, answer: str, position: str, level: int
     ) -> EvaluationResult:
         prompt = self._build_prompt(question, answer, position, level)
-        try:
-            response = await self._client.aio.models.generate_content(
-                model=self._model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=EvaluationResult,
-                ),
-            )
-        except Exception as exc:
-            raise AnswerEvaluationError("Gemini request failed") from exc
+        last_error: Exception | None = None
+
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            try:
+                response = await self._client.aio.models.generate_content(
+                    model=self._model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=EvaluationResult,
+                    ),
+                )
+                last_error = None
+                break
+            except Exception as exc:
+                last_error = exc
+                retryable = isinstance(exc, errors.ServerError) and "503" in str(exc)
+                if not retryable or attempt == MAX_ATTEMPTS:
+                    logger.exception("Gemini answer evaluation failed")
+                    raise AnswerEvaluationError("Gemini request failed") from exc
+                await asyncio.sleep(attempt)
+
+        if last_error is not None:
+            raise AnswerEvaluationError("Gemini request failed") from last_error
 
         result = response.parsed
-        if result is None:
-            raise AnswerEvaluationError("Gemini returned an unparsable response")
+        if not isinstance(result, EvaluationResult):
+            try:
+                result = EvaluationResult.model_validate(result)
+            except Exception as exc:
+                raise AnswerEvaluationError(
+                    "Gemini returned an unparsable response"
+                ) from exc
 
         if not (SCORE_MIN <= result.score <= SCORE_MAX):
             raise AnswerEvaluationError(
@@ -43,11 +69,14 @@ class GeminiAnswerEvaluator:
     def _build_prompt(
             self, question: str, answer: str, position: str, level: int
     ) -> str:
+        grade = LEVEL_LABELS.get(level, str(level))
         return (
-            f"You are evaluating a candidate's answer in a technical "
-            f"interview for a {position} position at level {level}.\n"
-            f"Question: {question}\n"
-            f"Candidate's answer: {answer}\n"
-            f"Score the answer from {SCORE_MIN} to {SCORE_MAX} and give "
-            "brief, specific feedback on what was correct or missing."
+            f"Ты оцениваешь ответ кандидата на техническом собеседовании "
+            f"на позицию {position}, уровень {grade}. "
+            f"Вопрос: {question}\n"
+            f"Ответ кандидата: {answer}\n"
+            f"Поставь оценку от {SCORE_MIN} до {SCORE_MAX} и дай короткую "
+            "конкретную обратную связь: что верно и чего не хватает. "
+            "Поле feedback пиши только на русском языке. "
+            "Английский допустим лишь в названиях технологий."
         )

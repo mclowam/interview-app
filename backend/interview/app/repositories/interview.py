@@ -14,6 +14,7 @@ class InterviewRepository:
         interview = InterviewModel(
             user_id=data.user_id,
             position=data.position,
+            level=data.level,
         )
 
         self._session.add(interview)

@@ -14,6 +14,12 @@ services:
     depends_on:
       auth-postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - auth-network
       - app-shared-network
@@ -33,8 +39,31 @@ services:
     depends_on:
       interview-postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - interview-network
+      - app-shared-network
+
+  telegram-bot:
+    build: ./telegram-bot
+    container_name: telegram_bot
+    env_file:
+      - ./telegram-bot/.env
+    environment:
+      AUTH_SERVICE_URL: http://auth:8000
+      INTERVIEW_SERVICE_URL: http://interview:8000
+    restart: unless-stopped
+    depends_on:
+      auth:
+        condition: service_healthy
+      interview:
+        condition: service_healthy
+    networks:
       - app-shared-network
 
   auth-postgres:

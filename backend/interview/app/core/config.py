@@ -1,15 +1,21 @@
-import os
 from functools import lru_cache
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-class Config:
-    DB_HOST = os.getenv("DB_HOST")
-    DB_PORT = os.getenv("DB_PORT")
-    DB_NAME = os.getenv("DB_NAME")
-    DB_USER = os.getenv("DB_USER")
-    DB_PASSWORD = os.getenv("DB_PASSWORD")
 
-    DEBUG = os.getenv("DEBUG")
+class Config(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
+    DB_USER: str
+    DB_PASSWORD: str
+    DEBUG: bool = False
+
+    # GEMINI_API_KEY must be set in .env
+    GEMINI_API_KEY: str
+    GEMINI_MODEL: str = "gemini-3.6-flash"
 
     @property
     def DATABASE_URL(self) -> str:
@@ -25,9 +31,10 @@ class Config:
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 
+
 @lru_cache
 def get_config() -> Config:
     return Config()
 
-config = get_config()
 
+config = get_config()

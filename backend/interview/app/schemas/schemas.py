@@ -6,15 +6,8 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
-class TurnCreateSchema(BaseModel):
-    question: str
-
-
 class TurnUpdateSchema(BaseModel):
-    answer: Optional[str] = None
-    turn_number: Optional[int] = None
-    score: Optional[int] = None
-    feedback: Optional[str] = None
+    answer: str
 
 
 class TurnResponseSchema(BaseModel):

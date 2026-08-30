@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 class InterviewCreateSchema(BaseModel):
     user_id: str
     position: str
+    level: int
 
 
 class InterviewResponseSchema(BaseModel):

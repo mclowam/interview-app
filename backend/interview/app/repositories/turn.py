@@ -28,7 +28,11 @@ class TurnRepository:
         return turn
 
     async def get_turns_by_interview_id(self, interview_id: uuid.UUID):
-        query = select(TurnModel).where(TurnModel.interview_id == interview_id)
+        query = (
+            select(TurnModel)
+            .where(TurnModel.interview_id == interview_id)
+            .order_by(TurnModel.turn_number)
+        )
         result = await self._session.execute(query)
 
         return result.scalars().all()
@@ -47,13 +51,21 @@ class TurnRepository:
 
         return result.scalar()
 
-    async def update(self, turn_id: uuid.UUID, data: TurnUpdateSchema):
+    async def update(
+            self,
+            turn_id: uuid.UUID,
+            data: TurnUpdateSchema | None = None,
+            **fields,
+    ):
         turn = await self.get_by_id(turn_id)
 
         if not turn:
             return None
 
-        update_data = data.model_dump(exclude_unset=True)
+        update_data = {}
+        if data is not None:
+            update_data.update(data.model_dump(exclude_unset=True))
+        update_data.update(fields)
 
         for key, value in update_data.items():
             setattr(turn, key, value)
